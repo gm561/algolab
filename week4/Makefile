@@ -1,4 +1,4 @@
-GCCFLAGS = -Wall  -O3
+CXXFLAGS = -O3 -Wall
 
 all: tournament algocoon
 

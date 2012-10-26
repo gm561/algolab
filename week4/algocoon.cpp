@@ -5,12 +5,13 @@
 #include<boost/graph/push_relabel_max_flow.hpp>
 #include <boost/graph/connected_components.hpp>
 
+#define SIZE(x) ((int) x.size())
+
 using namespace std;
 using namespace boost;
 
-typedef boost::adjacency_list_traits <boost::vecS, boost::vecS, boost::directedS > Traits;
-
 typedef adjacency_list_traits<vecS, vecS, directedS> Traits;
+
 typedef adjacency_list<vecS, vecS, directedS,
 		       no_property,
 		       property<edge_capacity_t, long,
@@ -20,7 +21,6 @@ typedef adjacency_list<vecS, vecS, directedS,
 
 typedef Graph::vertex_descriptor Vertex;
 typedef Graph::edge_descriptor Edge;
-
 
 int main(int argc, char *argv[])
 {
@@ -70,29 +70,12 @@ int main(int argc, char *argv[])
 	    capacity[reverse0] = 0;
 	}
 
-	int max_i = 0, min_i = 0;
-	for(int i = 0; i < V ;++i) {
-	    int d = degres[i];
-
-	    if(d > degres[max_i]) {
-		max_i = i;
-	    }
-
-	    if(d < degres[min_i]) {
-		min_i = i;
-	    }
-	}
-
-	Vertex s(min_i);
-	Vertex t(max_i);
+	Vertex s(0);
+	Vertex t(1);
 
 	long min_flow = push_relabel_max_flow(g, s, t);
-	Vertex min_target = t;
 
-	for(int i = 1; i < V; ++i) {
-	    if(i == min_i)
-		continue;
-
+	for(int i = 2; i < V; ++i) {
 	    Vertex tp(i);
 	    long flow = push_relabel_max_flow(g, s, tp);
 	    if(min_flow > flow) {
@@ -103,42 +86,39 @@ int main(int argc, char *argv[])
 
 	min_flow = push_relabel_max_flow(g, s, t);
 
-	// cerr<<"Source " << min_i<<" Sink "<<max_i <<"\n";
-	// cerr<< min_flow << "\n";
+    	typedef adjacency_list<vecS, vecS, bidirectionalS> Graph_bid;
+    	Graph_bid g_bid(V);
 
-	typedef adjacency_list<vecS, vecS, bidirectionalS> Graph_bid;
-	Graph_bid g_bid(V);
+    	graph_traits<Graph>::edge_iterator ei, ei_end;
+    	for (tie(ei, ei_end) = edges(g); ei != ei_end; ++ei){
+    	    // if(capacity[*ei] > 0 && residual_capacity[*ei] == 0) {
+    	    // 	std::cout << "(" << source(*ei, g)
+    	    // 		  << "," << target(*ei, g) << ") "<<endl;
+    	    // }
+//	    capacity[*ei] > 0 &&
+    	    if(residual_capacity[*ei] > 0){
+    		add_edge(source(*ei, g), target(*ei,g), g_bid);
+    	    }
+    	}
 
-	graph_traits<Graph>::edge_iterator ei, ei_end;
-	for (tie(ei, ei_end) = edges(g); ei != ei_end; ++ei){
-	    // if(capacity[*ei] > 0 && residual_capacity[*ei] == 0) {
-	    // 	std::cout << "(" << source(*ei, g)
-	    // 		  << "," << target(*ei, g) << ") "<<endl;
-	    // }
+    	cout<<min_flow<<"\n";
+    	vector<int> my_v;
 
-	    if(capacity[*ei] > 0 && residual_capacity[*ei] > 0){
-		add_edge(source(*ei, g), target(*ei,g), g_bid);
-	    }
-	}
+    	std::vector<int> component(num_vertices(g_bid));
+    	connected_components(g_bid, &component[0]);
 
-	cout<<min_flow<<"\n";
-	vector<int> my_v;
+    	int source_component = component[0];
+    	for (int j = 0; j < SIZE(component); ++j)
+    	    if(component[j] == source_component) {
+    		// cout << "Vertex " << j <<" is in component " << component[j] << endl;
+    		my_v.push_back(j);
+    	    }
 
-	std::vector<int> component(num_vertices(g_bid));
-	int num = connected_components(g_bid, &component[0]);
-
-	int source_component = component[min_i];
-	for (int j = 0; j != component.size(); ++j)
-	    if(component[j] == source_component) {
-		// cout << "Vertex " << j <<" is in component " << component[j] << endl;
-		my_v.push_back(j);
-	    }
-
-	cout<<my_v.size() << " ";
-	for(int i = 0; i < my_v.size(); ++i) {
-	    cout<<my_v[i]<<" ";
-	}
-	cout<<"\n";
+    	cout<<my_v.size() << " ";
+    	for(int i = 0; i < SIZE(my_v); ++i) {
+    	    cout<<my_v[i]<<" ";
+    	}
+    	cout<<"\n";
     }
 
     return 0;
