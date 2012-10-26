@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 	    }
 	}
 
-	int value = dfs_search(obstacles, start_point, end_point, X, Y);
+	int value = bfs_search(obstacles, start_point, end_point, X, Y);
 	if(value < 0) {
 	    cout<<"No solution.\n";
 	}
@@ -83,43 +83,6 @@ struct Node {
 	p = p_;
 	v = v_;
 	hops = -1;
-    }
-
-    Node(const Node& node) {
-	p = node.p;
-	v = node.v;
-	hops = node.hops;
-    }
-
-    bool operator==(const Node& n) const {
-	return p.first == n.p.first &&
-	    p.second  == n.p.second &&
-	    v.first == n.p.first &&
-	    v.second == n.p.second;
-    }
-
-    bool operator<(const Node& n) const {
-	if(p.first < n.p.first)
-	    return true;
-	if(p.first > n.p.first)
-	    return false;
-
-	if(p.second < n.p.second)
-	    return true;
-	if(p.second > n.p.second)
-	    return false;
-
-	if(v.first < n.v.first)
-	    return true;
-	if(v.first > n.v.first)
-	    return false;
-
-	if(v.second < n.v.second)
-	    return true;
-	if(v.second > n.v.second)
-	    return false;
-
-	return false;
     }
 };
 
@@ -169,7 +132,7 @@ int bfs_search(const set<point>& obstacles,
 	       int X, int Y) {
 
     bool isSolveable = false;
-    set<Node> visited;
+    vector<int> visited(X*Y*7*7, 0);
     queue<Node> q;
     Node sp(start_point, velocity(0,0));
     if(start_point == end_point)
@@ -180,8 +143,8 @@ int bfs_search(const set<point>& obstacles,
 
     sp.hops = 0;
 
+    sp.visisted = 1;
     q.push(sp);
-    visited.insert(sp);
     int hops = -1;
     while(!q.empty() && !isSolveable) {
 	Node node = q.front();
@@ -196,25 +159,25 @@ int bfs_search(const set<point>& obstacles,
 	for(vector<Node>::iterator it = nodes.begin();
 	    it != nodes.end();
 	    ++it) {
-
+	    Node in = *it;
 //	     cout<<"N: ("<<(*it).p.first << "," <<(*it).p.second << ") (" <<(*it).v.first <<"," <<(*it).v.second<<")"<<endl;
 
-	    if(obstacles.end() != obstacles.find((*it).p)) {
+	    if(obstacles.end() != obstacles.find(in.p)) {
 		continue;
 	    }
 
-	    if((*it).p.first == end_point.first &&
-	       (*it).p.second == end_point.second) {
+	    if(in.p.first == end_point.first &&
+	       in.p.second == end_point.second) {
 		isSolveable = true;
 		hops = node.hops + 1;
 		break;
 	    }
 
-	    if(visited.find(*it) == visited.end()) {
-		(*it).hops = node.hops + 1;
-		q.push(*it);
-		visited.insert(*it);
-//		cout<<"Visited size " << visited.size();
+	    if(in.visisted == 0) {
+		in.hops = node.hops + 1;
+		in.visisted = 1;
+		q.push(in);
+		cout<<"Visited " << node.p.first << " " << node.p.second <<"\n";
 	    }
 	}
     }

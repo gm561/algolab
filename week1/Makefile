@@ -1,5 +1,5 @@
 CXXFLAGS = -O3 -Wall
 
-all: raceTracks
+all: raceTrack2 demolition2
 
 
