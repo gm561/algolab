@@ -3,13 +3,14 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/boyer_myrvold_planar_test.hpp>
 
+
 using namespace std;
 using namespace boost;
 
 int main(int argc, char *argv[])
 {
-    cin.sync_with_stdio ( false );
-    cout.sync_with_stdio ( false );
+    cin.sync_with_stdio(false);
+    cout.sync_with_stdio(false);
 
     typedef std::pair<int, int> E;
     typedef adjacency_list<vecS, vecS, undirectedS,
